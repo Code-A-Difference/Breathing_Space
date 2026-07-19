@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraBreath Pro - Premium Mindfulness Space</title>
+    <style>
+        :root {
+            --bg-dark: #070b19;
+            --bg-card: #0f162a;
+            --accent-blue: #38bdf8;
+            --accent-green: #4ade80;
+            --accent-purple: #c084fc;
+            --accent-orange: #fb923c;
+            --accent-red: #f87171;
+            --text-main: #f8fafc;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .bg-glow {
+            position: absolute;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.06) 0%, rgba(7, 11, 25, 0) 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+            transition: background 1.2s ease;
+        }
+
+        .app-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 960px;
+            height: 94vh;
+            max-height: 880px;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .app-window {
+            width: 100%;
+            max-width: 495px;
+            height: 100%;
+            background: rgba(15, 22, 42, 0.78);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 32px;
+            padding: 35px 25px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            overflow-y: auto;
+        }
+
+        .side-panel {
+            width: 340px;
+            background: rgba(15, 22, 42, 0.6);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 32px;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+
+        .hidden { display: none !important; }
+
+        h1 { font-size: 2.2rem; font-weight: 700; text-align: center; margin-bottom: 4px; background: linear-gradient(to right, #fff, var(--text-muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { font-size: 0.95rem; color: var(--text-muted); text-align: center; margin-bottom: 25px; }
+        h2 { font-size: 1.15rem; font-weight: 600; margin: 18px 0 10px 0; color: var(--accent-blue); }
+
+        .streak-badge {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+        .streak-item { text-align: center; }
+        .streak-val { font-weight: 700; color: var(--accent-blue); font-size: 1.1rem; }
+
+        .btn-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 1.02rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.1s ease, background 0.2s ease, border-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            text-align: left;
+        }
+        .btn span { font-size: 0.82rem; color: var(--text-muted); font-weight: 400; text-align: right; margin-left: 10px; }
+        .btn:hover { background: rgba(255, 255, 255, 0.09); }
+        .btn:active { transform: scale(0.97); }
+        .btn.active { background: var(--accent-blue); color: var(--bg-dark); font-weight: 600; border-color: var(--accent-blue); }
+        .btn.active span { color: rgba(7, 11, 25, 0.7); }
+
+        .custom-delete-icon {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 10px;
+            position: absolute;
+            right: 8px;
+            z-index: 5;
+            display: none;
+            transition: transform 0.1s ease;
+        }
+        .custom-delete-icon:active { transform: scale(0.85); }
+        .btn-wrapper:hover .custom-delete-icon { display: block; }
+        .btn-wrapper:hover .btn.custom-btn-entry span { margin-right: 25px; }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--accent-blue), #0284c7);
+            color: #fff;
+            font-weight: 600;
+            justify-content: center;
+            margin-top: auto;
+            border: none;
+            padding: 16px;
+            box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+            flex-shrink: 0;
+            margin-bottom: 0;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 5;
+            transition: transform 0.1s ease;
+        }
+        .back-btn:active { transform: scale(0.85); }
+
+        .option-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .option-grid .btn { font-size: 0.9rem; padding: 12px 4px; justify-content: center; margin-bottom: 0; }
+
+        .custom-form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+        .custom-form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+        .custom-form-group input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 11px; color: var(--text-main); font-size: 0.95rem; }
+        .custom-form-group input:focus { outline: 1px solid var(--accent-blue); }
+
+        .engine-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; }
+        
+        #orb-container {
+            position: relative;
+            width: 270px;
+            height: 270px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.6) 0%, rgba(56, 189, 248, 0.05) 70%);
+            box-shadow: 0 0 50px rgba(56, 189, 248, 0.2);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.8s ease;
+            width: 140px;
+            height: 140px;
+        }
+        
+        #session-timer { font-size: 1.3rem; color: var(--text-muted); font-variant-numeric: tabular-nums; margin-bottom: 10px; }
+        #prompt-text { font-size: 2.3rem; font-weight: 300; text-align: center; min-height: 45px; margin-bottom: 5px; }
+        #sub-prompt { font-size: 1.1rem; color: var(--text-muted); min-height: 25px; text-align: center; }
+        #diagnostic-timer { font-size: 3.5rem; font-weight: 700; font-variant-numeric: tabular-nums; z-index: 2; }
+
+        .leaderboard-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
+        .leaderboard-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .leaderboard-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 10px 14px; border-radius: 10px; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.03); }
+        .delete-btn { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.9rem; padding: 2px 6px; border-radius: 4px; transition: transform 0.1s ease; }
+        .delete-btn:active { transform: scale(0.8); }
+        .delete-btn:hover { background: rgba(239,68,68,0.1); }
+        .clear-all { font-size: 0.75rem; color: #ef4444; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow" id="global-ambient-glow"></div>
+
+    <div class="app-container">
+        
+        <div class="app-window" id="menu-view">
+            <div style="font-size: 2.5rem; text-align: center; margin-bottom: 5px;">🧘✨</div>
+            <h1>AuraBreath Pro</h1>
+            <p class="subtitle">Premium Mindfulness Ecosystem</p>
+
+            <div class="streak-badge">
+                <div class="streak-item"><div class="streak-val" id="val-streak">1</div>🔥 Day Streak</div>
+                <div class="streak-item"><div class="streak-val" id="val-sessions">0</div>Sessions</div>
+                <div class="streak-item"><div class="streak-val" id="val-total">0m</div>Total Mindful</div>
+            </div>
+
+            <h2>🛠️ Create Custom Routine</h2>
+            <div style="background: rgba(255,255,255,0.02); padding: 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
+                <div class="custom-form-group">
+                    <label>Routine Name</label>
+                    <input type="text" id="cust-name" placeholder="e.g., Infinite Focus">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="custom-form-group"><label>Inhale (sec)</label><input type="number" id="cust-inhale" value="4" min="1"></div>
+                    <div class="custom-form-group"><label>Hold (sec)</label><input type="number" id="cust-hold" value="4" min="0"></div>
+                    <div class="custom-form-group"><label>Exhale (sec)</label><input type="number" id="cust-exhale" value="4" min="1"></div>
+                    <div class="custom-form-group"><label>Rest (sec)</label><input type="number" id="cust-rest" value="4" min="0"></div>
+                </div>
+                <button class="btn" style="background: var(--accent-green); color:#000; border:none; font-weight:600; justify-content:center; padding: 12px; margin-top:5px; margin-bottom:0;" onclick="createCustomRoutine()">Save & Register Routine</button>
+            </div>
+
+            <h2>1. Breathing Technique</h2>
+            <div style="display: flex; flex-direction: column; gap: 0;" id="technique-list">
+                <div class="btn-wrapper"><button class="btn active" onclick="selectTechnique('box', this)">Box Breathing <span>4s-4s-4s-4s</span></button></div>
+                <div class="btn-wrapper"><button class="btn" onclick="selectTechnique('478', this)">4-7-8 Technique <span>4s-7s-8s</span></button></div>
+                <div class="btn-wrapper"><button class="btn" onclick="selectTechnique('coherent', this)">Coherent Breathing <span>5s-5s</span></button></div>
+                <div class="btn-wrapper"><button class="btn" onclick="selectTechnique('sleep', this)">4-4-8 Sleep Breathing <span>4s-4s-8s</span></button></div>
+                <div class="btn-wrapper"><button class="btn" onclick="selectTechnique('bunny', this)">Bunny Breath <span>3 Sniffs + Exhale</span></button></div>
+                <div class="btn-wrapper"><button class="btn" onclick="selectTechnique('ocean', this)">Ocean Breath (Ujjayi) <span>6s Deep Waves</span></button></div>
+                <div class="btn-wrapper"><button class="btn" onclick="selectTechnique('bear', this)">Bear Breath <span>5s Grounding Anchor</span></button></div>
+                <div class="btn-wrapper"><button class="btn" onclick="selectTechnique('bumblebee', this)">Bumblebee Breath <span>Humming Vibrations</span></button></div>
+                <div class="btn-wrapper"><button class="btn" onclick="selectTechnique('train', this)">Steam Train Breath <span>Rapid Dynamic Tones</span></button></div>
+                <div class="btn-wrapper"><button class="btn" onclick="selectTechnique('dragon', this)">Dragon Breathing <span>Fiery Respiration</span></button></div>
+            </div>
+
+            <h2>2. Ambient Soundscapes</h2>
+            <div class="option-grid" id="sound-options">
+                <button class="btn active" onclick="selectSound('drone', this)">Warm Drone</button>
+                <button class="btn" onclick="selectSound('sine', this)">Cosmic Sine</button>
+            </div>
+
+            <h2>3. Session Duration</h2>
+            <div class="option-grid">
+                <button class="btn active" onclick="selectDuration(60, this)">1 Min</button>
+                <button class="btn" onclick="selectDuration(180, this)">3 Min</button>
+                <button class="btn" onclick="selectDuration(300, this)">5 Min</button>
+            </div>
+
+            <button class="btn action-btn" onclick="startBreathingSession()">Begin Session</button>
+            <button class="btn" style="border-color: var(--accent-purple); margin-top: 15px; margin-bottom: 0;" onclick="openDiagnosticView()">⏱️ Breath Retention Diagnostic</button>
+        </div>
+
+        <div class="app-window hidden" id="exercise-view">
+            <button class="back-btn" onclick="exitSession()">↩</button>
+            <div class="engine-view">
+                <div id="session-timer">00:00</div>
+                <div id="orb-container">
+                    <div class="orb" id="breathing-orb"></div>
+                </div>
+                <div id="prompt-text">Ready</div>
+                <div id="sub-prompt"></div>
+                <button class="btn action-btn" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; margin-top: 30px;" onclick="exitSession()">End Session</button>
+            </div>
+        </div>
+
+        <div class="app-window hidden" id="diagnostic-view">
+            <button class="back-btn" onclick="exitSession()">↩</button>
+            <div class="engine-view">
+                <h1 style="font-size: 1.6rem; margin-bottom: 20px;">Retention Diagnostic</h1>
+                <div id="orb-container">
+                    <div class="orb" id="diagnostic-orb" style="background: radial-gradient(circle, rgba(192, 132, 252, 0.6) 0%, rgba(192, 132, 252, 0.05) 70%); box-shadow: 0 0 50px rgba(192, 132, 252, 0.2);"></div>
+                    <div id="diagnostic-timer">00.0</div>
+                </div>
+                <div id="prompt-text" style="font-size: 1.6rem;">Tap Start to Prepare</div>
+                <div id="sub-prompt" style="margin-bottom: 20px;">Follow visual cues to maintain focus</div>
+                <button class="btn action-btn" id="diag-action-btn" onclick="handleDiagnosticCycle()" style="background: linear-gradient(135deg, var(--accent-purple), #9333ea); box-shadow: 0 4px 14px rgba(192, 132, 252, 0.3);">Start Test</button>
+            </div>
+        </div>
+
+        <div class="side-panel hidden" id="leaderboard-panel">
+            <div class="leaderboard-title">
+                <span>📈 Personal Records</span>
+                <span class="clear-all" onclick="clearAllTimes()">Clear All</span>
+            </div>
+            <ul class="leaderboard-list" id="leaderboard-rows">
+                </ul>
+        </div>
+
+    </div>
+
+    <script>
+        let selectedTechnique = 'box';
+        let selectedDuration = 60;
+        let selectedSoundStyle = 'drone';
+        let audioCtx = null, ambientOsc = null, ambientGain = null, waveOsc = null, waveGain = null;
+        let sessionCountdown = null, cycleTimeout = null, globalStepInterval = null;
+        
+        let totalSessions = parseInt(localStorage.getItem('totalSessions')) || 0;
+        let totalSecondsBreathed = parseInt(localStorage.getItem('totalSecondsBreathed')) || 0;
+
+        let customRoutines = JSON.parse(localStorage.getItem('customRoutines')) || {};
+
+        const techniques = {
+            box: [
+                { status: 'Inhale', duration: 4, scale: 2.3, color: 'rgba(56, 189, 248, 0.7)', pitch: 280, glow: 'rgba(56, 189, 248, 0.08)' },
+                { status: 'Hold', duration: 4, scale: 2.3, color: 'rgba(192, 132, 252, 0.7)', pitch: 280, glow: 'rgba(192, 132, 252, 0.08)' },
+                { status: 'Exhale', duration: 4, scale: 1.0, color: 'rgba(74, 222, 128, 0.7)', pitch: 220, glow: 'rgba(74, 222, 128, 0.08)' },
+                { status: 'Rest', duration: 4, scale: 1.0, color: 'rgba(100, 116, 139, 0.4)', pitch: 220, glow: 'rgba(100, 116, 139, 0.03)' }
+            ],
+            '478': [
+                { status: 'Inhale', duration: 4, scale: 2.3, color: 'rgba(56, 189, 248, 0.7)', pitch: 300, glow: 'rgba(56, 189, 248, 0.08)' },
+                { status: 'Hold', duration: 7, scale: 2.3, color: 'rgba(192, 132, 252, 0.7)', pitch: 300, glow: 'rgba(192, 132, 252, 0.08)' },
+                { status: 'Exhale', duration: 8, scale: 1.0, color: 'rgba(74, 222, 128, 0.7)', pitch: 200, glow: 'rgba(74, 222, 128, 0.08)' }
+            ],
+            coherent: [
+                { status: 'Inhale', duration: 5, scale: 2.3, color: 'rgba(56, 189, 248, 0.7)', pitch: 260, glow: 'rgba(56, 189, 248, 0.08)' },
+                { status: 'Exhale', duration: 5, scale: 1.0, color: 'rgba(74, 222, 128, 0.7)', pitch: 220, glow: 'rgba(74, 222, 128, 0.08)' }
+            ],
+            sleep: [
+                { status: 'Inhale', duration: 4, scale: 2.3, color: 'rgba(56, 189, 248, 0.7)', pitch: 240, glow: 'rgba(56, 189, 248, 0.08)' },
+                { status: 'Hold', duration: 4, scale: 2.3, color: 'rgba(192, 132, 252, 0.7)', pitch: 240, glow: 'rgba(192, 132, 252, 0.08)' },
+                { status: 'Exhale', duration: 8, scale: 1.0, color: 'rgba(74, 222, 128, 0.7)', pitch: 180, glow: 'rgba(74, 222, 128, 0.08)' }
+            ],
+            bunny: [
+                { status: 'Sniff 1', duration: 1, scale: 1.4, color: 'rgba(56, 189, 248, 0.7)', pitch: 320, glow: 'rgba(56, 189, 248, 0.06)' },
+                { status: 'Sniff 2', duration: 1, scale: 1.8, color: 'rgba(56, 189, 248, 0.7)', pitch: 360, glow: 'rgba(56, 189, 248, 0.07)' },
+                { status: 'Sniff 3', duration: 1, scale: 2.3, color: 'rgba(56, 189, 248, 0.7)', pitch: 400, glow: 'rgba(56, 189, 248, 0.09)' },
+                { status: 'Smooth Exhale', duration: 5, scale: 1.0, color: 'rgba(74, 222, 128, 0.7)', pitch: 220, glow: 'rgba(74, 222, 128, 0.08)' }
+            ],
+            ocean: [
+                { status: 'Deep Ocean Inhale', duration: 6, scale: 2.4, color: 'rgba(56, 189, 248, 0.7)', pitch: 210, glow: 'rgba(56, 189, 248, 0.09)' },
+                { status: 'Oceanic Throat Exhale', duration: 6, scale: 1.0, color: 'rgba(34, 211, 238, 0.7)', pitch: 170, glow: 'rgba(34, 211, 238, 0.08)' }
+            ],
+            bear: [
+                { status: 'Deep Grounding Inhale', duration: 5, scale: 2.2, color: 'rgba(56, 189, 248, 0.6)', pitch: 220, glow: 'rgba(56, 189, 248, 0.07)' },
+                { status: 'Hibernation Hold', duration: 5, scale: 2.2, color: 'rgba(192, 132, 252, 0.6)', pitch: 220, glow: 'rgba(192, 132, 252, 0.08)' },
+                { status: 'Release Exhale', duration: 5, scale: 1.0, color: 'rgba(74, 222, 128, 0.6)', pitch: 190, glow: 'rgba(74, 222, 128, 0.07)' },
+                { status: 'Rest Empty Anchor', duration: 5, scale: 1.0, color: 'rgba(100, 116, 139, 0.4)', pitch: 190, glow: 'rgba(100, 116, 139, 0.03)' }
+            ],
+            bumblebee: [
+                { status: 'Deep Inhale', duration: 4, scale: 2.3, color: 'rgba(56, 189, 248, 0.7)', pitch: 270, glow: 'rgba(56, 189, 248, 0.08)' },
+                { status: 'Humming Exhale (Mmmm)', duration: 8, scale: 1.0, color: 'rgba(253, 224, 71, 0.7)', pitch: 140, glow: 'rgba(253, 224, 71, 0.09)' }
+            ],
+            train: [
+                { status: 'Rhythmic Engine', duration: 1, scale: 2.0, color: 'rgba(251, 146, 60, 0.7)', pitch: 340, glow: 'rgba(251, 146, 60, 0.08)', silentVocal: true },
+                { status: 'Rhythmic Engine', duration: 1, scale: 1.1, color: 'rgba(248, 113, 113, 0.7)', pitch: 240, glow: 'rgba(248, 113, 113, 0.08)', silentVocal: true }
+            ],
+            dragon: [
+                { status: 'Gather Fire Inhale', duration: 4, scale: 2.4, color: 'rgba(251, 146, 60, 0.8)', pitch: 290, glow: 'rgba(251, 146, 60, 0.09)' },
+                { status: 'Fiery Sudden Ventilation', duration: 3, scale: 0.9, color: 'rgba(239, 68, 68, 0.9)', pitch: 150, glow: 'rgba(239, 68, 68, 0.1)' }
+            ]
+        };
+
+        function updateStatsUI() {
+            document.getElementById('val-sessions').textContent = totalSessions;
+            document.getElementById('val-total').textContent = Math.round(totalSecondsBreathed / 60) + "m";
+        }
+        
+        function initApp() {
+            updateStatsUI();
+            loadCustomRoutinesUI();
+        }
+
+        function selectTechnique(tech, element) {
+            selectedTechnique = tech;
+            document.getElementById('technique-list').querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function selectDuration(seconds, element) {
+            selectedDuration = seconds;
+            element.parentNode.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function selectSound(style, element) {
+            selectedSoundStyle = style;
+            document.getElementById('sound-options').querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function createCustomRoutine() {
+            const name = document.getElementById('cust-name').value.trim() || ("Custom Routine " + (Object.keys(customRoutines).length + 1));
+            const inhale = parseInt(document.getElementById('cust-inhale').value) || 4;
+            const hold = parseInt(document.getElementById('cust-hold').value) || 0;
+            const exhale = parseInt(document.getElementById('cust-exhale').value) || 4;
+            const rest = parseInt(document.getElementById('cust-rest').value) || 0;
+
+            const id = "custom_" + Date.now();
+            let builtSteps = [];
+            builtSteps.push({ status: 'Inhale', duration: inhale, scale: 2.3, color: 'rgba(56, 189, 248, 0.7)', pitch: 280, glow: 'rgba(56, 189, 248, 0.08)' });
+            if(hold > 0) builtSteps.push({ status: 'Hold', duration: hold, scale: 2.3, color: 'rgba(192, 132, 252, 0.7)', pitch: 280, glow: 'rgba(192, 132, 252, 0.08)' });
+            builtSteps.push({ status: 'Exhale', duration: exhale, scale: 1.0, color: 'rgba(74, 222, 128, 0.7)', pitch: 220, glow: 'rgba(74, 222, 128, 0.08)' });
+            if(rest > 0) builtSteps.push({ status: 'Rest', duration: rest, scale: 1.0, color: 'rgba(100, 116, 139, 0.4)', pitch: 220, glow: 'rgba(100, 116, 139, 0.03)' });
+
+            customRoutines[id] = { name: name, steps: builtSteps, summary: `${inhale}s-${hold}s-${exhale}s-${rest}s` };
+            localStorage.setItem('customRoutines', JSON.stringify(customRoutines));
+            loadCustomRoutinesUI();
+            
+            document.getElementById('cust-name').value = "";
+        }
+
+        function removeCustomRoutine(id, event) {
+            if (event) event.stopPropagation();
+            if (confirm("Delete this custom routine?")) {
+                delete customRoutines[id];
+                delete techniques[id];
+                localStorage.setItem('customRoutines', JSON.stringify(customRoutines));
+                
+                if (selectedTechnique === id) {
+                    selectedTechnique = 'box';
+                    setTimeout(() => {
+                        const firstBtn = document.getElementById('technique-list').querySelector('.btn');
+                        if (firstBtn) firstBtn.classList.add('active');
+                    }, 10);
+                }
+                loadCustomRoutinesUI();
+            }
+        }
+
+        function loadCustomRoutinesUI() {
+            document.querySelectorAll('.custom-wrapper-entry').forEach(el => el.remove());
+            const container = document.getElementById('technique-list');
+            
+            Object.keys(customRoutines).forEach(id => {
+                const routine = customRoutines[id];
+                techniques[id] = routine.steps; 
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = "btn-wrapper custom-wrapper-entry";
+                
+                const btn = document.createElement('button');
+                btn.className = "btn custom-btn-entry";
+                btn.style.borderColor = "var(--accent-green)";
+                btn.onclick = function() { selectTechnique(id, btn); };
+                btn.innerHTML = `🛠️ ${routine.name} <span>${routine.summary}</span>`;
+                
+                const delBtn = document.createElement('button');
+                delBtn.className = "custom-delete-icon";
+                delBtn.innerHTML = "🗑️";
+                delBtn.onclick = function(e) { removeCustomRoutine(id, e); };
+                
+                wrapper.appendChild(btn);
+                wrapper.appendChild(delBtn);
+                container.appendChild(wrapper);
+                
+                if (selectedTechnique === id) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function startAudioEngine() {
+            if (audioCtx) return;
+            
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            ambientOsc = audioCtx.createOscillator();
+            ambientGain = audioCtx.createGain();
+            ambientOsc.type = selectedSoundStyle === 'drone' ? 'triangle' : 'sine';
+            ambientOsc.frequency.setValueAtTime(selectedSoundStyle === 'drone' ? 98.00 : 110.00, audioCtx.currentTime);
+            ambientGain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+            
+            const lowPass = audioCtx.createBiquadFilter();
+            lowPass.type = 'lowpass';
+            lowPass.frequency.setValueAtTime(220, audioCtx.currentTime);
+            
+            ambientOsc.connect(lowPass);
+            lowPass.connect(ambientGain);
+            ambientGain.connect(audioCtx.destination);
+            ambientOsc.start();
+
+            waveOsc = audioCtx.createOscillator();
+            waveGain = audioCtx.createGain();
+            waveOsc.type = 'sine';
+            waveOsc.frequency.setValueAtTime(220, audioCtx.currentTime);
+            waveGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+            
+            waveOsc.connect(waveGain);
+            waveGain.connect(audioCtx.destination);
+            waveOsc.start();
+        }
+
+        function stopAudioEngine() {
+            if (!audioCtx) return;
+            try {
+                ambientOsc.stop();
+                waveOsc.stop();
+            } catch(e){}
+            audioCtx.close();
+            audioCtx = null;
+        }
+
+        function modulateSound(pitch, targetVolume, timeWindow) {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            
+            if (timeWindow <= 1) {
+                waveOsc.frequency.setValueAtTime(pitch, now);
+                waveGain.gain.setValueAtTime(targetVolume, now);
+            } else {
+                waveOsc.frequency.exponentialRampToValueAtTime(pitch, now + timeWindow);
+                waveGain.gain.linearRampToValueAtTime(targetVolume, now + timeWindow);
+            }
+        }
+
+        function vocalize(msg) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(msg);
+            utterance.rate = 0.85; 
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function startBreathingSession() {
+            startAudioEngine();
+            document.getElementById('menu-view').classList.add('hidden');
+            document.getElementById('exercise-view').classList.remove('hidden');
+            
+            let timeLeft = selectedDuration;
+            const timerEl = document.getElementById('session-timer');
+            
+            sessionCountdown = setInterval(() => {
+                let mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+                let secs = (timeLeft % 60).toString().padStart(2, '0');
+                timerEl.textContent = `${mins}:${secs}`;
+                
+                totalSecondsBreathed++;
+                localStorage.setItem('totalSecondsBreathed', totalSecondsBreathed);
+                
+                if (timeLeft <= 0) {
+                    totalSessions++;
+                    localStorage.setItem('totalSessions', totalSessions);
+                    updateStatsUI();
+                    exitSession();
+                }
+                timeLeft--;
+            }, 1000);
+
+            let currentStep = 0;
+            const steps = techniques[selectedTechnique] || techniques['box'];
+            const orb = document.getElementById('breathing-orb');
+            const prompt = document.getElementById('prompt-text');
+            const subPrompt = document.getElementById('sub-prompt');
+            const glowLayer = document.getElementById('global-ambient-glow');
+
+            if (selectedTechnique === 'train') {
+                vocalize("Inhale and exhale rapidly");
+            }
+
+            function runCycle() {
+                const config = steps[currentStep];
+                prompt.textContent = config.status;
+                prompt.style.color = config.color;
+                orb.style.transform = `scale(${config.scale})`;
+                orb.style.background = `radial-gradient(circle, ${config.color} 0%, rgba(7,11,25,0) 70%)`;
+                
+                glowLayer.style.background = `radial-gradient(circle, ${config.glow || 'rgba(56, 189, 248, 0.05)'} 0%, rgba(7, 11, 25, 0) 70%)`;
+                
+                if (!config.silentVocal) {
+                    vocalize(config.status);
+                }
+
+                let vol = config.status.includes('Hold') || config.status.includes('Hibernate') ? 0.02 : (config.status.includes('Rest') ? 0.005 : 0.06);
+                modulateSound(config.pitch, vol, config.duration);
+
+                let durationCounter = config.duration;
+                subPrompt.textContent = `${durationCounter}s left`;
+                
+                clearInterval(globalStepInterval);
+                globalStepInterval = setInterval(() => {
+                    durationCounter--;
+                    if(durationCounter > 0) subPrompt.textContent = `${durationCounter}s left`;
+                    else clearInterval(globalStepInterval);
+                }, 1000);
+
+                cycleTimeout = setTimeout(() => {
+                    currentStep = (currentStep + 1) % steps.length;
+                    runCycle();
+                }, config.duration * 1000);
+            }
+            runCycle();
+        }
+
+        let diagState = 'idle'; 
+        let diagTimerInterval = null;
+        let diagTimeElapsed = 0;
+
+        function openDiagnosticView() {
+            document.getElementById('menu-view').classList.add('hidden');
+            document.getElementById('diagnostic-view').classList.remove('hidden');
+            document.getElementById('leaderboard-panel').classList.remove('hidden');
+            renderLeaderboard();
+            resetDiagnosticLayout();
+        }
+
+        function resetDiagnosticLayout() {
+            diagState = 'idle';
+            clearInterval(diagTimerInterval);
+            clearInterval(globalStepInterval);
+            document.getElementById('diagnostic-timer').textContent = "00.0";
+            document.getElementById('prompt-text').textContent = "Tap Start to Prepare";
+            document.getElementById('sub-prompt').textContent = "Follow calibration steps smoothly";
+            
+            const actionBtn = document.getElementById('diag-action-btn');
+            actionBtn.textContent = "Start Test";
+            actionBtn.style.background = "linear-gradient(135deg, var(--accent-purple), #9333ea)";
+            
+            document.getElementById('diagnostic-orb').style.transform = "scale(1.0)";
+            document.getElementById('global-ambient-glow').style.background = `radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, rgba(7, 11, 25, 0) 70%)`;
+            stopAudioEngine();
+        }
+
+        function handleDiagnosticCycle() {
+            const prompt = document.getElementById('prompt-text');
+            const subPrompt = document.getElementById('sub-prompt');
+            const orb = document.getElementById('diagnostic-orb');
+            const actionBtn = document.getElementById('diag-action-btn');
+            const glowLayer = document.getElementById('global-ambient-glow');
+
+            if (diagState === 'idle') {
+                startAudioEngine();
+                actionBtn.disabled = true;
+                actionBtn.textContent = "Calibrating Space...";
+
+                diagState = 'relax';
+                prompt.textContent = "Relax";
+                vocalize("Relax");
+                orb.style.transform = "scale(1.1)";
+                glowLayer.style.background = `radial-gradient(circle, rgba(164, 180, 200, 0.05) 0%, rgba(7, 11, 25, 0) 70%)`;
+                modulateSound(220, 0.03, 4);
+
+                setTimeout(() => {
+                    diagState = 'breath-1';
+                    prompt.textContent = "Take a Deep Breath";
+                    vocalize("Take a deep breath");
+                    orb.style.transform = "scale(2.3)";
+                    glowLayer.style.background = `radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, rgba(7, 11, 25, 0) 70%)`;
+                    modulateSound(320, 0.05, 4);
+
+                    setTimeout(() => {
+                        diagState = 'exhale';
+                        prompt.textContent = "Exhale Fully";
+                        vocalize("Exhale fully");
+                        orb.style.transform = "scale(0.8)";
+                        glowLayer.style.background = `radial-gradient(circle, rgba(74, 222, 128, 0.08) 0%, rgba(7, 11, 25, 0) 70%)`;
+                        modulateSound(180, 0.02, 4);
+
+                        setTimeout(() => {
+                            diagState = 'breath-2';
+                            prompt.textContent = "Take a Deep Breath";
+                            vocalize("Take a deep breath");
+                            orb.style.transform = "scale(2.4)";
+                            glowLayer.style.background = `radial-gradient(circle, rgba(56, 189, 248, 0.09) 0%, rgba(7, 11, 25, 0) 70%)`;
+                            modulateSound(350, 0.06, 4);
+
+                            setTimeout(() => {
+                                diagState = 'holding';
+                                actionBtn.disabled = false;
+                                actionBtn.textContent = "STOP & SAVE TIME";
+                                actionBtn.style.background = "linear-gradient(135deg, #ef4444, #dc2626)";
+                                prompt.textContent = "Hold";
+                                vocalize("Hold");
+                                prompt.style.color = "var(--accent-purple)";
+                                orb.style.transform = "scale(1.6)";
+                                glowLayer.style.background = `radial-gradient(circle, rgba(192, 132, 252, 0.09) 0%, rgba(7, 11, 25, 0) 70%)`;
+                                
+                                if (waveGain) waveGain.gain.setValueAtTime(0, audioCtx.currentTime);
+
+                                diagTimeElapsed = 0;
+                                const startTimestamp = Date.now();
+                                diagTimerInterval = setInterval(() => {
+                                    diagTimeElapsed = (Date.now() - startTimestamp) / 1000;
+                                    document.getElementById('diagnostic-timer').textContent = diagTimeElapsed.toFixed(1);
+                                }, 100);
+
+                            }, 4000);
+                        }, 4000);
+                    }, 4000);
+                }, 4000);
+
+            } else if (diagState === 'holding') {
+                clearInterval(diagTimerInterval);
+                diagState = 'done';
+                actionBtn.textContent = "Test Again";
+                actionBtn.style.background = "linear-gradient(135deg, var(--accent-blue), #0284c7)";
+                prompt.textContent = "Test Completed";
+                vocalize("Excellent work");
+                prompt.style.color = "var(--accent-green)";
+                subPrompt.textContent = `Retention metric captured safely`;
+                orb.style.transform = "scale(1.0)";
+                
+                saveTime(diagTimeElapsed.toFixed(1));
+                stopAudioEngine();
+            } else if (diagState === 'done') {
+                resetDiagnosticLayout();
+            }
+        }
+
+        function saveTime(time) {
+            let records = JSON.parse(localStorage.getItem('breathRecords')) || [];
+            records.push({ id: Date.now(), score: parseFloat(time), date: new Date().toLocaleDateString() });
+            records.sort((a, b) => b.score - a.score);
+            localStorage.setItem('breathRecords', JSON.stringify(records));
+            renderLeaderboard();
+        }
+
+        function deleteRecord(id) {
+            let records = JSON.parse(localStorage.getItem('breathRecords')) || [];
+            records = records.filter(item => item.id !== id);
+            localStorage.setItem('breathRecords', JSON.stringify(records));
+            renderLeaderboard();
+        }
+
+        function clearAllTimes() {
+            if(confirm("Wipe leaderboard clean?")) {
+                localStorage.removeItem('breathRecords');
+                renderLeaderboard();
+            }
+        }
+
+        function renderLeaderboard() {
+            const listEl = document.getElementById('leaderboard-rows');
+            listEl.innerHTML = "";
+            let records = JSON.parse(localStorage.getItem('breathRecords')) || [];
+
+            if (records.length === 0) {
+                listEl.innerHTML = `<li class="leaderboard-item" style="color:var(--text-muted); justify-content:center;">No records captured yet</li>`;
+                return;
+            }
+
+            records.forEach((row, i) => {
+                const li = document.createElement('li');
+                li.className = "leaderboard-item";
+                li.innerHTML = `
+                    <span>#${i+1} <b>${row.score}s</b> <small style="color:var(--text-muted); margin-left:5px;">(${row.date})</small></span>
+                    <button class="delete-btn" onclick="deleteRecord(${row.id})">🗑️</button>
+                `;
+                listEl.appendChild(li);
+            });
+        }
+
+        function exitSession() {
+            clearInterval(sessionCountdown);
+            clearInterval(diagTimerInterval);
+            clearInterval(globalStepInterval);
+            clearTimeout(cycleTimeout);
+            stopAudioEngine();
+            
+            document.getElementById('exercise-view').classList.add('hidden');
+            document.getElementById('diagnostic-view').classList.add('hidden');
+            document.getElementById('leaderboard-panel').classList.add('hidden');
+            document.getElementById('menu-view').classList.remove('hidden');
+            resetDiagnosticLayout();
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
